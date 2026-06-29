@@ -5,17 +5,33 @@ services:
     image: nginx:alpine
     container_name: main-nginx
     restart: always
+    
+    # Подключаем файл с переменными
+    env_file:
+      - .env
+    
+    # Пробрасываем переменные внутрь контейнера
+    environment:
+      - FINSOVETNIK_DOMAIN=${FINSOVETNIK_DOMAIN}
+      - RESUME_AI_DOMAIN=${RESUME_AI_DOMAIN}
+
     ports:
       - "80:80"
       - "443:443"
+      
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # Монтируем ШАБЛОН, а не готовый конфиг
+      - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
       - ./ssl:/etc/nginx/ssl:ro
       - ./logs:/var/log/nginx
+      
+    # Магия: при запуске envsubst заменяет переменные в шаблоне и сохраняет в nginx.conf
+    command: >
+      /bin/sh -c "envsubst '$$FINSOVETNIK_DOMAIN $$RESUME_AI_DOMAIN' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+      
     networks:
       - main-network
 
 networks:
   main-network:
-    external: true
-    name: finsovetnik_finsovetnik-network
+    driver: bridge
