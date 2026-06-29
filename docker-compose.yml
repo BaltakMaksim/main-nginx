@@ -24,6 +24,8 @@ services:
       - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
       - ./ssl:/etc/nginx/ssl:ro
       - ./logs:/var/log/nginx
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
       
     # Магия: при запуске envsubst заменяет переменные в шаблоне и сохраняет в nginx.conf
     command: >

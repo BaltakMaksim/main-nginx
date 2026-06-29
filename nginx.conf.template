@@ -26,12 +26,12 @@ http {
 
     # Upstream ФинСоветник (порт 81 на хосте)
     upstream finsovetnik {
-        server 127.0.0.1:81;
+        server host.docker.internal:81;
     }
 
     # Upstream Resume AI (порт 82 на хосте)
     upstream resume_ai {
-        server 127.0.0.1:82;
+        server host.docker.internal:82;
     }
 
     # ==========================================
