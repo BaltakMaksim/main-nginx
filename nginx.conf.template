@@ -24,15 +24,16 @@ http {
     limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
     limit_req_zone $binary_remote_addr zone=auth:10m rate=5r/s;
 
-    # Upstream ФинСоветник (внутренний адрес контейнера)
-    upstream finsovetnik {
-        server finsovetnik-nginx:80;
-    }
+    # Upstream ФинСоветник (внешний порт 81)
+upstream finsovetnik {
+    server 127.0.0.1:81;
+}
 
-    # Upstream Resume AI (внутренний адрес контейнера)
-    upstream resume_ai {
-        server resume-ai-app:80;
-    }
+# Upstream Resume AI (внутренний порт resume-ai-app)
+# Так как мы остановили resume-ai-nginx, проксируем напрямую на app
+upstream resume_ai {
+    server 127.0.0.1:82;  # или какой порт у resume-ai-app?
+}
 
     # ==========================================
     # ФинСоветник
