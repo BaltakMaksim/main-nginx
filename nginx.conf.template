@@ -24,19 +24,18 @@ http {
     limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
     limit_req_zone $binary_remote_addr zone=auth:10m rate=5r/s;
 
-    # Upstream ФинСоветник (внешний порт 81)
-upstream finsovetnik {
-    server 127.0.0.1:81;
-}
+    # Upstream ФинСоветник (порт 81 на хосте)
+    upstream finsovetnik {
+        server 127.0.0.1:81;
+    }
 
-# Upstream Resume AI (внутренний порт resume-ai-app)
-# Так как мы остановили resume-ai-nginx, проксируем напрямую на app
-upstream resume_ai {
-    server 127.0.0.1:82;  # или какой порт у resume-ai-app?
-}
+    # Upstream Resume AI (порт 82 на хосте)
+    upstream resume_ai {
+        server 127.0.0.1:82;
+    }
 
     # ==========================================
-    # ФинСоветник
+    # ФинСоветник - HTTP → HTTPS
     # ==========================================
     server {
         listen 80;
@@ -45,7 +44,8 @@ upstream resume_ai {
     }
 
     server {
-        listen 443 ssl http2;
+        listen 443 ssl;
+        http2 on;
         server_name ${FINSOVETNIK_DOMAIN} www.${FINSOVETNIK_DOMAIN};
 
         ssl_certificate /etc/nginx/ssl/finsovetnik/fullchain.pem;
@@ -75,7 +75,7 @@ upstream resume_ai {
     }
 
     # ==========================================
-    # Resume AI
+    # Resume AI - HTTP → HTTPS
     # ==========================================
     server {
         listen 80;
@@ -84,11 +84,12 @@ upstream resume_ai {
     }
 
     server {
-        listen 443 ssl http2;
+        listen 443 ssl;
+        http2 on;
         server_name ${RESUME_AI_DOMAIN} www.${RESUME_AI_DOMAIN};
 
-        ssl_certificate /etc/nginx/ssl/resume_ai/fullchain.pem;
-        ssl_certificate_key /etc/nginx/ssl/resume_ai/privkey.pem;
+        ssl_certificate /etc/nginx/ssl/resume-ai/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/resume-ai/privkey.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
         ssl_ciphers HIGH:!aNULL:!MD5;
         ssl_prefer_server_ciphers on;
